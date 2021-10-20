@@ -34,13 +34,8 @@ public class GreetingController {
     }
 
     @PostMapping("/1.0/adyen/notification")
-    public ResponseEntity<ResponseWrapper> captureNotifications(@RequestHeader(value = "HmacSignature", required = false) String headerSignature,
-                                                                @RequestHeader(value = "Protocol", required = false) String protocol,
-                                                                @RequestHeader(value = "username", required = false) String username,
-                                                                @RequestHeader(value = "password", required = false) String password,
-                                                                @RequestHeader Map<String, String> headers,
-
-                                                                @RequestBody String payload) throws InvalidKeyException {
+    public ResponseEntity<ResponseWrapper> captureNotifications(@RequestHeader Map<String, String> headers,@RequestBody String payload)
+            throws InvalidKeyException {
         System.out.println("##################");
         headers.forEach((key, value) -> {
             System.out.println(String.format("Header '%s' = %s", key, value));
@@ -51,7 +46,7 @@ public class GreetingController {
 
         try {
             NotificationRequest request = notificationHandler.handleNotificationJson(payload);
-            testNotificationHmac(request.getNotificationItems(), headerSignature, protocol);
+            testNotificationHmac(request.getNotificationItems());
             request.getNotificationItems().stream().map(x->x.getEventCode()).forEach(x -> System.out.println(x.toString() + " " + LocalDateTime.now()));
             return new ResponseEntity<>(new ResponseWrapper("[accepted]"), HttpStatus.OK);
 
@@ -60,8 +55,8 @@ public class GreetingController {
         }
 
         NotificationRequest notificationRequest = notificationHandler.handleNotificationJson(payload);
-        testNotificationHmac(notificationRequest.getNotificationItems(), headerSignature, protocol);
-        testNotificationHmacContainers(notificationRequest.getNotificationItemContainers(), headerSignature, protocol);
+        testNotificationHmac(notificationRequest.getNotificationItems());
+        testNotificationHmacContainers(notificationRequest.getNotificationItemContainers());
 
 
         try {
@@ -80,7 +75,7 @@ public class GreetingController {
         return new ResponseEntity<>(new ResponseWrapper("[denied]"), HttpStatus.OK);
     }
 
-    public void testNotificationHmac(List<NotificationRequestItem> list, String headerSignature, String protocol) throws InvalidKeyException {
+    public void testNotificationHmac(List<NotificationRequestItem> list) throws InvalidKeyException {
         if (list == null || list.isEmpty())
             return;
         HMACValidator hmacValidator = new HMACValidator();
@@ -96,7 +91,7 @@ public class GreetingController {
     }
 
 
-    public void testNotificationHmacContainers(List<NotificationRequestItemContainer> list, String headerSignature, String protocol) throws InvalidKeyException {
+    public void testNotificationHmacContainers(List<NotificationRequestItemContainer> list) throws InvalidKeyException {
         if (list == null || list.isEmpty())
             return;
         HMACValidator hmacValidator = new HMACValidator();
