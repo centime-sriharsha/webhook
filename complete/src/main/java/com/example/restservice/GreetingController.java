@@ -34,7 +34,7 @@ public class GreetingController {
         return "Hello i am up and running !";
     }
 
-    @PostMapping("/1.0/adyen/notification")
+    @PostMapping("/1.0/adyen/webhook-notification")
     public ResponseEntity<String> captureNotifications(@RequestHeader Map<String, String> headers, @RequestBody String payload)
             throws InvalidKeyException, SignatureException {
         System.out.println("##################");
